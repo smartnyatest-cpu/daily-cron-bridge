@@ -1,0 +1,22 @@
+name: Daily Cloud Cron Bridge
+
+on:
+  schedule:
+    # Runs everyday at 11:00 UTC (unlimited & guaranteed on public runners)
+    - cron: '0 11 * * *'
+  workflow_dispatch:
+
+jobs:
+  dispatch-weather-bot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Private Weather Trading Bot
+        run: |
+          echo "Triggering private Polymarket Weather Trading Bot..."
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST             -H "Authorization: token ${{ secrets.PAT_TOKEN }}"             -H "Accept: application/vnd.github.v3+json"             https://api.github.com/repos/smartnyatest-cpu/Weather/actions/workflows/394917444/dispatches             -d '{"ref":"main"}')
+          echo "Dispatch HTTP Status: $RESPONSE"
+          if [ "$RESPONSE" != "204" ]; then
+            echo "Failed to dispatch! Status was $RESPONSE"
+            exit 1
+          fi
+          echo "Successfully triggered Weather Trading Bot!"
