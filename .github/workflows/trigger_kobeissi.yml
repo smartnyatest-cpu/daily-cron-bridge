@@ -1,0 +1,22 @@
+name: Daily Kobeissi Cron Bridge
+
+on:
+  schedule:
+    # Runs Monday through Friday at 21:30 UTC (unlimited on public runners)
+    - cron: '30 21 * * 1-5'
+  workflow_dispatch:
+
+jobs:
+  dispatch-kobeissi-bot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Private Kobeissi Scanner
+        run: |
+          echo "Triggering private Kobeissi Trading Scanner..."
+          RESPONSE=$(curl -s -o /dev/null -w "%{http_code}" -X POST             -H "Authorization: token ${{ secrets.PAT_TOKEN }}"             -H "Accept: application/vnd.github.v3+json"             https://api.github.com/repos/smartnyatest-cpu/kobeissi/actions/workflows/339949160/dispatches             -d '{"ref":"main"}')
+          echo "Dispatch HTTP Status: $RESPONSE"
+          if [ "$RESPONSE" != "204" ]; then
+            echo "Failed to dispatch! Status was $RESPONSE"
+            exit 1
+          fi
+          echo "Successfully triggered Kobeissi Trading Scanner!"
